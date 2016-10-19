@@ -10,6 +10,7 @@ class GestureView extends Component {
         gestures: PropTypes.array,
         onLayout: PropTypes.func,
         onError: PropTypes.func,
+        onComplete: PropTypes.func,
     }
 
     static defaultProps = {
@@ -76,6 +77,14 @@ class GestureView extends Component {
 
         stream.subscribe(
             layout => {
+                // We'll receive a raw event for the onDragRelease
+                if (layout.target) {
+                    if (this.props.onComplete) {
+                        this.props.onComplete()
+                    }
+                    return
+                }
+
                 this.container.setNativeProps({
                     style: this.props.onLayout(layout),
                 })
