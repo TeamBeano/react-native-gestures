@@ -14,6 +14,7 @@ export default React.createClass({
   propTypes: {
     gestures: PropTypes.array.isRequired,
     onError: PropTypes.func.isRequired,
+    onGestureComplete: PropTypes.func.isRequired,
     toStyle: PropTypes.func.isRequired,
     style: PropTypes.any,
     children: PropTypes.array,
@@ -26,9 +27,17 @@ export default React.createClass({
 
   componentDidMount () {
     this.layoutStream.subscribe(
-      (layout) => this.container.setNativeProps({
-        style: this.props.toStyle(layout)
-      }),
+      (layout) => {
+        // We'll receive a raw event for the onDragRelease
+        if (layout.target) {
+          this.props.onGestureComplete()
+          return
+        }
+
+        this.container.setNativeProps({
+          style: this.props.toStyle(layout)
+        })
+      },
       (err) => this.props.onError(err)
     )
   },
