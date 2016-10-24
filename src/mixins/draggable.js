@@ -4,9 +4,7 @@ import { PanResponder } from 'react-native'
 
 function yes () { return true }
 
-export default function draggableMixin (gestureDefs) {
-  gestureDefs = gestureDefs || []
-
+export default function draggableMixin (gestureDefs = []) {
   var target
   var layout
 
@@ -14,6 +12,8 @@ export default function draggableMixin (gestureDefs) {
   let isCurrentTarget = (ev) => ev.target === target
 
   return {
+    gestureDefs: null,
+
     componentWillMount () {
       let onDragStart = new Rx.Subject()
       let onDragMove = new Rx.Subject()
@@ -48,13 +48,15 @@ export default function draggableMixin (gestureDefs) {
       })
 
       if (this.props && this.props.gestures) {
-        gestureDefs = gestureDefs.concat(this.props.gestures)
+        this.gestureDefs = gestureDefs.concat(this.props.gestures)
+      } else {
+        this.gestureDefs = gestureDefs
       }
 
       this.layoutStream = Rx
         .Observable
-        .merge(gestureDefs.map(def =>
+        .merge(this.gestureDefs.map(def =>
           create(def.responder, def.transducer, getInitialLayout, draggable)))
-    }
+    },
   }
 }

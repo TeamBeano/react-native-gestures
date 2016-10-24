@@ -10,6 +10,7 @@ import {
 
 export default React.createClass({
   mixins: [events(['onLayout']), draggableMixin()],
+  subscription: null,
 
   propTypes: {
     gestures: PropTypes.array.isRequired,
@@ -26,7 +27,7 @@ export default React.createClass({
   },
 
   componentDidMount () {
-    this.layoutStream.subscribe(
+    this.subscription = this.layoutStream.subscribe(
       (layout) => {
         // We'll receive a raw event for the onDragRelease
         if (layout.target) {
@@ -40,6 +41,12 @@ export default React.createClass({
       },
       (err) => this.props.onError(err)
     )
+  },
+
+  componentWillUnmount() {
+    if (this.subscription != null) {
+      this.subscription.dispose()
+    }
   },
 
   render () {
