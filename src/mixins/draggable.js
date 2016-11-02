@@ -5,14 +5,18 @@ import { PanResponder } from 'react-native'
 function yes () { return true }
 
 export default function draggableMixin (gestureDefs = []) {
-  var target
-  var layout
-
-  let getInitialLayout = () => layout
-  let isCurrentTarget = (ev) => ev.target === target
-
   return {
+    target: null,
+    layout: null,
     gestureDefs: null,
+
+    getInitialLayout() {
+      return this.layout
+    },
+
+    isCurrentTarget(ev) {
+      return ev.target === this.target
+    },
 
     componentWillMount () {
       let onDragStart = new Rx.Subject()
@@ -22,16 +26,16 @@ export default function draggableMixin (gestureDefs = []) {
       this
         .onLayout
         .take(1)
-        .subscribe(ev => target = ev.target)
+        .subscribe(ev => this.target = ev.target)
 
       this
         .onLayout
-        .subscribe(ev => layout = ev.layout)
+        .subscribe(ev => this.layout = ev.layout)
 
       let draggable = {
-        onDragStart: onDragStart.filter(isCurrentTarget),
-        onDragMove: onDragMove.filter(isCurrentTarget),
-        onDragRelease: onDragRelease.filter(isCurrentTarget)
+        onDragStart: onDragStart.filter(this.isCurrentTarget),
+        onDragMove: onDragMove.filter(this.isCurrentTarget),
+        onDragRelease: onDragRelease.filter(this.isCurrentTarget)
       }
 
       this.gestureResponder = PanResponder.create({
@@ -56,7 +60,7 @@ export default function draggableMixin (gestureDefs = []) {
       this.layoutStream = Rx
         .Observable
         .merge(this.gestureDefs.map(def =>
-          create(def.responder, def.transducer, getInitialLayout, draggable)))
+          create(def.responder, def.transducer, this.getInitialLayout, draggable)))
     },
   }
 }
