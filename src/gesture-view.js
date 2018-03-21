@@ -34,6 +34,8 @@ class GestureView extends Component {
         stream: null,
     }
 
+    subscription = null
+
     componentDidMount() {
         const onDragStart = new Rx.Subject()
         const onDragMove = new Rx.Subject()
@@ -75,7 +77,7 @@ class GestureView extends Component {
             ),
         )
 
-        stream.subscribe(
+        this.subscription = stream.subscribe(
             layout => {
                 // We'll receive a raw event for the onDragRelease
                 if (layout.target) {
@@ -98,6 +100,12 @@ class GestureView extends Component {
             responder,
             stream,
         })
+    }
+
+    componentWillUnmount() {
+        if (this.subscription != null) {
+            this.subscription.dispose()
+        }
     }
 
     render() {
